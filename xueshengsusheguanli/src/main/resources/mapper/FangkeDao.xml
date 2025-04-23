@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.FangkeDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.sushe_id as susheId
+        ,a.suguan_id as suguanId
+        ,a.fangke_name as fangkeName
+        ,a.fangke_phone as fangkePhone
+        ,a.fangke_id_number as fangkeIdNumber
+        ,a.sex_types as sexTypes
+        ,a.fangke_photo as fangkePhoto
+        ,a.fangke_content as fangkeContent
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.FangkeView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,sushe.sushe_number_uuid as susheNumberUuid
+        ,sushe.louyu_types as louyuTypes
+        ,sushe.sushe_name as susheName
+        ,sushe.sushe_louceng as susheLouceng
+        ,sushe.sushe_address as susheAddress
+        ,sushe.kezhu_number as kezhuNumber
+        ,sushe.yizhu_number as yizhuNumber
+        ,suguan.suguan_name as suguanName
+        ,suguan.suguan_phone as suguanPhone
+        ,suguan.suguan_photo as suguanPhoto
+        ,suguan.suguan_email as suguanEmail
+
+        FROM fangke  a
+        left JOIN sushe sushe ON a.sushe_id = sushe.id
+        left JOIN suguan suguan ON a.suguan_id = suguan.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.susheId != null and params.susheId != ''">
+                and (
+                    a.sushe_id = #{params.susheId}
+                )
+            </if>
+            <if test="params.suguanId != null and params.suguanId != ''">
+                and (
+                    a.suguan_id = #{params.suguanId}
+                )
+            </if>
+            <if test=" params.fangkeName != '' and params.fangkeName != null and params.fangkeName != 'null' ">
+                and a.fangke_name like CONCAT('%',#{params.fangkeName},'%')
+            </if>
+            <if test=" params.fangkePhone != '' and params.fangkePhone != null and params.fangkePhone != 'null' ">
+                and a.fangke_phone like CONCAT('%',#{params.fangkePhone},'%')
+            </if>
+            <if test=" params.fangkeIdNumber != '' and params.fangkeIdNumber != null and params.fangkeIdNumber != 'null' ">
+                and a.fangke_id_number like CONCAT('%',#{params.fangkeIdNumber},'%')
+            </if>
+            <if test="params.sexTypes != null and params.sexTypes != ''">
+                and a.sex_types = #{params.sexTypes}
+            </if>
+            <if test=" params.fangkeContent != '' and params.fangkeContent != null and params.fangkeContent != 'null' ">
+                and a.fangke_content like CONCAT('%',#{params.fangkeContent},'%')
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断宿舍的id不为空 -->
+            <if test=" params.susheIdNotNull != '' and params.susheIdNotNull != null and params.susheIdNotNull != 'null' ">
+                and a.sushe_id IS NOT NULL
+            </if>
+            <if test=" params.susheNumberUuid != '' and params.susheNumberUuid != null and params.susheNumberUuid != 'null' ">
+                and sushe.sushe_number_uuid like CONCAT('%',#{params.susheNumberUuid},'%')
+            </if>
+            <if test="params.louyuTypes != null  and params.louyuTypes != ''">
+                and sushe.louyu_types = #{params.louyuTypes}
+            </if>
+
+            <if test=" params.susheName != '' and params.susheName != null and params.susheName != 'null' ">
+                and sushe.sushe_name like CONCAT('%',#{params.susheName},'%')
+            </if>
+            <if test=" params.susheLouceng != '' and params.susheLouceng != null and params.susheLouceng != 'null' ">
+                and sushe.sushe_louceng like CONCAT('%',#{params.susheLouceng},'%')
+            </if>
+            <if test=" params.susheAddress != '' and params.susheAddress != null and params.susheAddress != 'null' ">
+                and sushe.sushe_address like CONCAT('%',#{params.susheAddress},'%')
+            </if>
+            <if test="params.kezhuNumberStart != null  and params.kezhuNumberStart != '' ">
+                <![CDATA[  and sushe.kezhu_number >= #{params.kezhuNumberStart}   ]]>
+            </if>
+            <if test="params.kezhuNumberEnd != null  and params.kezhuNumberEnd != '' ">
+                <![CDATA[  and sushe.kezhu_number <= #{params.kezhuNumberEnd}   ]]>
+            </if>
+            <if test="params.kezhuNumber != null  and params.kezhuNumber != '' ">
+                and sushe.kezhu_number = #{params.kezhuNumber}
+            </if>
+            <if test="params.yizhuNumberStart != null  and params.yizhuNumberStart != '' ">
+                <![CDATA[  and sushe.yizhu_number >= #{params.yizhuNumberStart}   ]]>
+            </if>
+            <if test="params.yizhuNumberEnd != null  and params.yizhuNumberEnd != '' ">
+                <![CDATA[  and sushe.yizhu_number <= #{params.yizhuNumberEnd}   ]]>
+            </if>
+            <if test="params.yizhuNumber != null  and params.yizhuNumber != '' ">
+                and sushe.yizhu_number = #{params.yizhuNumber}
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(sushe.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(sushe.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+                <!-- 判断宿管的id不为空 -->
+            <if test=" params.suguanIdNotNull != '' and params.suguanIdNotNull != null and params.suguanIdNotNull != 'null' ">
+                and a.suguan_id IS NOT NULL
+            </if>
+            <if test=" params.suguanName != '' and params.suguanName != null and params.suguanName != 'null' ">
+                and suguan.suguan_name like CONCAT('%',#{params.suguanName},'%')
+            </if>
+            <if test=" params.suguanPhone != '' and params.suguanPhone != null and params.suguanPhone != 'null' ">
+                and suguan.suguan_phone like CONCAT('%',#{params.suguanPhone},'%')
+            </if>
+            <if test=" params.suguanEmail != '' and params.suguanEmail != null and params.suguanEmail != 'null' ">
+                and suguan.suguan_email like CONCAT('%',#{params.suguanEmail},'%')
+            </if>
+        </where>
+
+        order by a.${params.orderBy} desc 
+    </select>
+
+</mapper>
